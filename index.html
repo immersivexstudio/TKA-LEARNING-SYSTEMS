@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lentera Gamma - TKA Learning System</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .bg-pattern {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .menu-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+        }
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background: #ffffff;
+        }
+        .option-label:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .option-input:checked + .option-label {
+            border-color: #2563eb;
+            background: #dbeafe;
+            font-weight: 600;
+        }
+        .option-input {
+            display: none;
+        }
+        .custom-box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cbd5e1;
+            border-radius: 4px;
+            margin-right: 12px;
+            margin-top: 2px;
+            display: inline-block;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .option-input[type="radio"] + .option-label .custom-box {
+            border-radius: 50%;
+        }
+        .option-input:checked + .option-label .custom-box {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        .option-input:checked + .option-label .custom-box::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+        .option-input[type="checkbox"]:checked + .option-label .custom-box::after {
+            content: '✔';
+            color: white;
+            font-size: 12px;
+            top: -1px;
+            left: 3px;
+            background: transparent;
+            border-radius: 0;
+        }
+        .nav-box {
+            width: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #d1d5db;
+            background: white;
+            transition: 0.2s;
+        }
+        .nav-box.answered {
+            background: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+        }
+        .nav-box.active {
+            outline: 2px solid #eab308;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-[Poppins] text-gray-800">
+
+    <img id="logo-img" src="logo.png" style="display:none;" alt="Logo Instansi" crossorigin="anonymous">
+
+    <section id="login-section" class="min-h-screen flex items-center justify-center bg-pattern">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-11/12 max-w-md text-center transform transition-all">
+            <img src="logo.png" alt="Lentera Gamma Logo" class="w-32 mx-auto mb-4 drop-shadow-md" onerror="this.src='https://via.placeholder.com/150?text=Logo+Lentera+Gamma'">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">TKA LEARNING SYSTEM</h1>
+            <p class="text-sm text-gray-500 mb-8">FOR ELEMENTARY STUDENTS</p>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <input type="text" id="username" placeholder="Username" class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-yellow-500 outline-none transition" required>
+                </div>
+                <div>
+                    <input type="password" id="password" placeholder="Password" class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-yellow-500 outline-none transition" required>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transform hover:-translate-y-1 transition">MASUK</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="identity-section" class="hidden min-h-screen flex items-center justify-center bg-pattern">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-11/12 max-w-lg text-center">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b-2 border-yellow-500 inline-block pb-2">Identitas Siswa</h2>
+            <form id="identity-form" class="space-y-6">
+                <div class="text-left">
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">Nama Lengkap</label>
+                    <input type="text" id="student-name" placeholder="NAMA LENGKAP ANDA" class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-yellow-500 outline-none uppercase font-bold text-gray-800" required>
+                    <p class="text-xs text-gray-400 mt-1">*Ketik menggunakan huruf kapital</p>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-md">SIMPAN & LANJUTKAN</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="main-menu-section" class="hidden min-h-screen bg-gray-100">
+        <nav class="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" class="w-10" onerror="this.src='https://via.placeholder.com/50'">
+                <h1 class="font-bold text-lg text-gray-800">LENTERA GAMMA</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="display-student-name" class="font-semibold text-blue-600"></span>
+                <button onclick="logout()" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200">Keluar</button>
+            </div>
+        </nav>
+
+        <div class="max-w-6xl mx-auto mt-10 p-4 grid md:grid-cols-2 gap-8">
+            <div onclick="showSection('materi-menu-section')" class="menu-card bg-white rounded-2xl p-8 shadow-lg cursor-pointer border-t-4 border-yellow-500 text-center hover:shadow-2xl transition">
+                <div class="text-5xl mb-4">📖</div>
+                <h2 class="text-2xl font-bold mb-2">Ringkasan Materi</h2>
+                <p class="text-gray-600">Pelajari materi Numerasi dan Literasi secara ringkas dan mudah dipahami.</p>
+            </div>
+            <div onclick="showSection('exam-menu-section')" class="menu-card bg-white rounded-2xl p-8 shadow-lg cursor-pointer border-t-4 border-blue-600 text-center hover:shadow-2xl transition">
+                <div class="text-5xl mb-4">📝</div>
+                <h2 class="text-2xl font-bold mb-2">Soal TKA</h2>
+                <p class="text-gray-600">Uji kemampuan akademis Anda melalui simulasi ujian berstandar HOTS.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="materi-menu-section" class="hidden min-h-screen bg-gray-50 pb-10">
+        <div class="bg-blue-600 text-white p-6 shadow-md relative">
+            <button onclick="showSection('main-menu-section')" class="absolute top-6 left-6 font-bold">&larr; Kembali</button>
+            <h2 class="text-center text-2xl font-bold">Menu Ringkasan Materi</h2>
+        </div>
+        <div class="max-w-4xl mx-auto mt-8 p-4 space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow border-l-4 border-yellow-500">
+                <h3 class="text-xl font-bold mb-3">Matematika (Numerasi)</h3>
+                <div class="text-sm text-gray-700 space-y-2">
+                    <p><strong>1. Elemen Bilangan:</strong> Operasi hitung bilangan bulat & cacah, KPK/FPB, Pecahan (senilai, desimal), Persen & Rasio.</p>
+                    <p><strong>2. Elemen Geometri:</strong> Sifat, keliling, luas bangun datar. Bangun ruang (jaring-jaring, volume, luas permukaan). Pengukuran baku.</p>
+                    <p><strong>3. Elemen Data:</strong> Interpretasi tabel, diagram batang/gambar. Rata-rata, median, modus.</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow border-l-4 border-blue-500">
+                <h3 class="text-xl font-bold mb-3">Bahasa Indonesia (Literasi)</h3>
+                <div class="text-sm text-gray-700 space-y-2">
+                    <p><strong>1. Teks Nonfiksi:</strong> Informasi tersurat/tersirat, gagasan pokok, kosakata, urutan kejadian.</p>
+                    <p><strong>2. Teks Fiksi:</strong> Unsur intrinsik (tokoh, latar, alur, pesan moral), gaya bahasa & puisi.</p>
+                    <p><strong>3. Literasi Fungsional & Evaluasi:</strong> Pengumuman, iklan, petunjuk arah. Kesesuaian ilustrasi teks, refleksi.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="exam-menu-section" class="hidden min-h-screen bg-gray-50 pb-10">
+        <div class="bg-yellow-500 text-gray-900 p-6 shadow-md relative">
+            <button onclick="showSection('main-menu-section')" class="absolute top-6 left-6 font-bold">&larr; Kembali</button>
+            <h2 class="text-center text-2xl font-bold">Pilih Paket Ujian TKA</h2>
+        </div>
+        
+        <div class="max-w-5xl mx-auto mt-8 p-4 grid md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-600">
+                <h3 class="text-xl font-bold mb-4 text-center border-b pb-2">TKA Matematika (Numerasi)</h3>
+                <div class="space-y-3" id="math-packet-list"></div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-yellow-500">
+                <h3 class="text-xl font-bold mb-4 text-center border-b pb-2">TKA Bahasa Indonesia (Literasi)</h3>
+                <div class="space-y-3" id="bi-packet-list"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="exam-section" class="hidden min-h-screen bg-gray-100 flex flex-col">
+        <header class="bg-white shadow px-6 py-4 flex justify-between items-center sticky top-0 z-40">
+            <div>
+                <h2 id="exam-title" class="font-bold text-lg text-gray-800">Nama Paket</h2>
+                <p class="text-sm text-gray-500" id="exam-student-name">Nama Siswa</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold shadow-inner border border-red-200">
+                    Sisa Waktu: <span id="timer-display">50:00</span>
+                </div>
+                <button onclick="submitExam()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700">Selesai (Submit)</button>
+            </div>
+        </header>
+
+        <div class="flex-1 max-w-6xl w-full mx-auto p-4 flex flex-col md:flex-row gap-6 mt-4">
+            <div class="flex-1 bg-white p-8 rounded-xl shadow-lg relative">
+                <div class="mb-6 flex justify-between items-center border-b pb-2">
+                    <span class="font-bold text-xl text-blue-600">Soal No. <span id="q-number">1</span></span>
+                    <span class="text-sm font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded" id="q-type">Pilihan Ganda</span>
+                </div>
+                
+                <div id="question-text" class="text-gray-800 text-lg leading-relaxed mb-8 prose max-w-none"></div>
+                <div id="options-area" class="space-y-3"></div>
+                
+                <div class="flex justify-between mt-10">
+                    <button onclick="prevQuestion()" class="px-6 py-2 bg-gray-200 text-gray-700 font-bold rounded hover:bg-gray-300">&larr; Sebelumnya</button>
+                    <button onclick="nextQuestion()" class="px-6 py-2 bg-blue-600 text-white font-bold rounded hover:bg-blue-700">Selanjutnya &rarr;</button>
+                </div>
+            </div>
+
+            <div class="w-full md:w-72 bg-white p-6 rounded-xl shadow-lg h-fit">
+                <h3 class="font-bold mb-4 text-center border-b pb-2">Navigasi Soal</h3>
+                <div id="question-nav-grid" class="grid grid-cols-5 gap-2"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="result-section" class="hidden min-h-screen bg-gray-100 p-8">
+        <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-2xl text-center">
+            <h1 class="text-3xl font-bold mb-2">HASIL UJIAN TKA</h1>
+            <h2 id="res-exam-title" class="text-xl text-gray-600 mb-6 border-b pb-4">Paket Soal</h2>
+            
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <p class="text-sm text-gray-500">Nilai Anda</p>
+                    <p id="res-score" class="text-4xl font-bold text-blue-600">0</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                    <p class="text-sm text-gray-500">Predikat</p>
+                    <p id="res-grade" class="text-4xl font-bold text-green-600">-</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                    <p class="text-sm text-gray-500">Ketuntasan</p>
+                    <p id="res-status" class="text-2xl font-bold mt-2 text-purple-600">LULUS</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 border-t pt-8">
+                <button onclick="downloadAnalysisPDF()" class="bg-gray-800 text-white px-6 py-3 rounded-lg font-bold shadow hover:bg-gray-900 flex items-center gap-2">
+                    📄 Download Analisis Ujian
+                </button>
+                <button id="btn-cert" onclick="downloadCertificate()" class="bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold shadow hover:bg-yellow-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    🏆 Unduh Sertifikat
+                </button>
+                <button onclick="retakeExam()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold shadow hover:bg-blue-700 flex items-center gap-2">
+                    🔄 Kerjakan Ulang
+                </button>
+                <button onclick="showSection('exam-menu-section')" class="bg-red-500 text-white px-6 py-3 rounded-lg font-bold shadow hover:bg-red-600">
+                    Kembali ke Menu
+                </button>
+            </div>
+
+            <div class="mt-12 text-left">
+                <h3 class="text-xl font-bold mb-4 border-b pb-2">Kunci Jawaban & Pembahasan</h3>
+                <div id="discussion-area" class="space-y-4"></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const PACKET_DATA = [
+            { id: 'MN001', name: 'PAKET SOAL TKA MATEMATIKA 1', type: 'MATH', pass: 'MN001TKA' },
+            { id: 'MN002', name: 'PAKET SOAL TKA MATEMATIKA 2', type: 'MATH', pass: 'MN002TKA' },
+            { id: 'MN003', name: 'PAKET SOAL TKA MATEMATIKA 3', type: 'MATH', pass: 'MN003TKA' },
+            { id: 'MN004', name: 'PAKET SOAL TKA MATEMATIKA 4', type: 'MATH', pass: 'MN004TKA' },
+            { id: 'MN005', name: 'PAKET SOAL TKA MATEMATIKA 5', type: 'MATH', pass: 'MN005TKA' },
+            { id: 'BIL001', name: 'PAKET SOAL TKA BAHASA INDONESIA 1', type: 'BI', pass: 'BIL001TKA' },
+            { id: 'BIL002', name: 'PAKET SOAL TKA BAHASA INDONESIA 2', type: 'BI', pass: 'BIL002TKA' },
+            { id: 'BIL003', name: 'PAKET SOAL TKA BAHASA INDONESIA 3', type: 'BI', pass: 'BIL003TKA' },
+            { id: 'BIL004', name: 'PAKET SOAL TKA BAHASA INDONESIA 4', type: 'BI', pass: 'BIL004TKA' },
+            { id: 'BIL005', name: 'PAKET SOAL TKA BAHASA INDONESIA 5', type: 'BI', pass: 'BIL005TKA' }
+        ];
+
+        // 25 SOAL HOTS MATEMATIKA
+        const mathQuestions = [
+            { id: 1, type: 'pg', text: 'Di sebuah desa wisata, Pak Budi dan Pak Andi mengelola kebun apel. Hari ini Pak Budi memanen $3\\frac{1}{2}$ kuintal apel, sedangkan Pak Andi memanen $1,75$ kuintal lebih banyak dari Pak Budi. Jika $40\\%$ dari total panen mereka berdua dikirim ke panti asuhan, berapa kuintal apel yang dikirim ke panti asuhan?', options: ['A. 3,5 kuintal', 'B. 4,2 kuintal', 'C. 3,2 kuintal', 'D. 8,75 kuintal'], answer: ['A. 3,5 kuintal'], weight: 4, pembahasan: 'Budi = 3,5. Andi = 3,5 + 1,75 = 5,25. Total = 8,75 kuintal. 40% dari 8,75 = 0,4 x 8,75 = 3,5 kuintal.' },
+            { id: 2, type: 'pgk', text: 'Desa Sukamaju mendapatkan dana desa untuk membangun bak penampungan air berbentuk balok. Bak tersebut memiliki kedalaman $2$ meter, panjang $5$ meter, dan lebar $3$ meter. Karena kemarau panjang, bak tersebut saat ini hanya terisi air sebanyak $\\frac{2}{3}$ dari kapasitas maksimalnya. Manakah dari pernyataan berikut yang benar? (Pilih lebih dari satu)', options: ['A. Kapasitas maksimal bak air adalah 30.000 liter', 'B. Volume air dalam bak saat ini adalah 20.000 liter', 'C. Bak tersebut membutuhkan 15.000 liter air lagi agar penuh', 'D. Luas permukaan dasar bak adalah $15\\text{ m}^2$'], answer: ['A. Kapasitas maksimal bak air adalah 30.000 liter', 'B. Volume air dalam bak saat ini adalah 20.000 liter', 'D. Luas permukaan dasar bak adalah $15\\text{ m}^2$'], weight: 4, pembahasan: 'Volume = 5 x 3 x 2 = $30\\text{ m}^3$ = 30.000 L. 2/3 x 30.000 = 20.000 L. Butuh 10.000 L agar penuh (salah). Luas dasar = 5 x 3 = 15 (benar).' },
+            { id: 3, type: 'bs', text: 'Tentukan apakah pernyataan berikut Benar atau Salah: "Sebuah taman berbentuk lingkaran dengan diameter $28$ meter akan ditanami pohon palem di sekelilingnya. Jika jarak antar pohon adalah $4$ meter, maka dibutuhkan tepat 22 pohon palem untuk mengelilingi taman tersebut." (Gunakan $\\pi = \\frac{22}{7}$)', options: ['Benar', 'Salah'], answer: ['Benar'], weight: 4, pembahasan: 'Keliling = $\\pi \\times d = 22/7 \\times 28 = 88\\text{ m}$. Banyak pohon = 88 / 4 = 22 pohon. Pernyataan Benar.' },
+            { id: 4, type: 'pg', text: 'Sekolah Laskar Pelangi mengadakan kegiatan tanam pohon. Rasio bibit pohon mangga dan pohon rambutan yang dibagikan adalah $3 : 5$. Jika selisih jumlah bibit pohon mangga dan rambutan yang dibagikan adalah 40 batang, berapakah total seluruh bibit pohon yang ditanam hari itu?', options: ['A. 100 batang', 'B. 120 batang', 'C. 160 batang', 'D. 200 batang'], answer: ['C. 160 batang'], weight: 4, pembahasan: 'Selisih rasio = 5 - 3 = 2. 2 bagian = 40 batang, maka 1 bagian = 20. Total rasio = 3 + 5 = 8. Total batang = 8 x 20 = 160.' },
+            { id: 5, type: 'pgk', text: 'Untuk menyambut HUT RI ke-79, sebuah toko alat tulis memberikan diskon bertingkat untuk perlengkapan sekolah. Sebuah tas seharga Rp250.000,00 mendapat diskon $20\\% + 10\\%$. Berdasarkan informasi tersebut, manakah pernyataan yang tepat?', options: ['A. Total diskon yang diberikan adalah 30%', 'B. Harga tas setelah diskon pertama adalah Rp200.000,00', 'C. Harga akhir yang harus dibayar adalah Rp180.000,00', 'D. Potongan harga total bernilai Rp75.000,00'], answer: ['B. Harga tas setelah diskon pertama adalah Rp200.000,00', 'C. Harga akhir yang harus dibayar adalah Rp180.000,00'], weight: 4, pembahasan: 'Diskon bukan 30%. Diskon 1 (20%) = Rp50.000, sisa Rp200.000. Diskon 2 (10% dari 200k) = Rp20.000. Harga akhir = Rp180.000. Total potongan Rp70.000.' },
+            { id: 6, type: 'bs', text: 'Benar atau Salah: "Jika sebuah mobil melaju dengan kecepatan rata-rata $60\\text{ km/jam}$ dan berangkat dari kota A ke kota B pada pukul 07.15, mobil tersebut akan tiba di kota B yang berjarak $150\\text{ km}$ pada pukul 09.45."', options: ['Benar', 'Salah'], answer: ['Benar'], weight: 4, pembahasan: 'Waktu = Jarak / Kecepatan = 150 / 60 = 2,5 jam (2 jam 30 menit). 07.15 + 02.30 = 09.45. Benar.' },
+            { id: 7, type: 'pg', text: 'Data hasil panen padi (dalam ton) di Desa Makmur selama 5 tahun berturut-turut adalah sebagai berikut: 45, 50, x, 65, dan 70. Jika rata-rata hasil panen padi selama 5 tahun tersebut adalah 58 ton, berapakah hasil panen pada tahun ketiga (x)?', options: ['A. 55 ton', 'B. 60 ton', 'C. 65 ton', 'D. 70 ton'], answer: ['B. 60 ton'], weight: 4, pembahasan: 'Total 5 tahun = 58 x 5 = 290 ton. 45 + 50 + x + 65 + 70 = 230 + x = 290. x = 60.' },
+            { id: 8, type: 'pgk', text: 'Pakar gizi menghitung kebutuhan kalori harian 5 orang anak SD: Andi (1200), Budi (1350), Citra (1150), Dewi (1400), dan Eka (1300). Manakah pernyataan yang mencerminkan analisis data kalori tersebut dengan benar?', options: ['A. Median dari data kalori tersebut adalah 1300', 'B. Rata-rata kebutuhan kalori mereka adalah 1280', 'C. Jangkauan (selisih kalori tertinggi dan terendah) adalah 250', 'D. Kalori Budi berada di bawah rata-rata'], answer: ['A. Median dari data kalori tersebut adalah 1300', 'B. Rata-rata kebutuhan kalori mereka adalah 1280', 'C. Jangkauan (selisih kalori tertinggi dan terendah) adalah 250'], weight: 4, pembahasan: 'Urut: 1150, 1200, 1300, 1350, 1400. Median = 1300. Rata2 = 6400/5 = 1280. Jangkauan = 1400-1150 = 250. Budi (1350) di atas rata-rata.' },
+            { id: 9, type: 'pg', text: 'Bus Trans Semarang koridor 1 berangkat setiap 15 menit, koridor 2 setiap 20 menit, dan koridor 3 setiap 25 menit. Jika pada pukul 06.00 ketiga bus berangkat bersamaan dari halte Balai Kota, pada pukul berapa ketiganya akan berangkat bersamaan lagi untuk yang kedua kalinya?', options: ['A. Pukul 09.00', 'B. Pukul 10.00', 'C. Pukul 11.00', 'D. Pukul 12.00'], answer: ['C. Pukul 11.00'], weight: 4, pembahasan: 'KPK dari 15, 20, 25 adalah 300 menit = 5 jam. 06.00 + 5 jam = 11.00.' },
+            { id: 10, type: 'bs', text: 'Benar atau Salah: "Pak Rahmat memiliki 72 buku tulis, 48 pensil, dan 60 penghapus. Jika ia ingin membagikannya ke dalam paket bantuan belajar dengan isi tiap paket sama rata dan maksimal, maka ia bisa membuat tepat 12 paket."', options: ['Benar', 'Salah'], answer: ['Benar'], weight: 4, pembahasan: 'FPB dari 72, 48, 60 adalah 12. Benar.' },
+            { id: 11, type: 'pg', text: 'Jarak kota P dan Q pada peta yang berskala $1 : 1.500.000$ adalah $4\\text{ cm}$. Jika Andi mengendarai motor dari kota P ke kota Q dengan kecepatan $40\\text{ km/jam}$, berapa lama waktu yang dibutuhkan Andi untuk sampai di tujuan?', options: ['A. 1 jam', 'B. 1,5 jam', 'C. 2 jam', 'D. 2,5 jam'], answer: ['B. 1,5 jam'], weight: 4, pembahasan: 'Jarak sebenarnya = 4 x 1.500.000 = 6.000.000 cm = 60 km. Waktu = 60 / 40 = 1,5 jam.' },
+            { id: 12, type: 'pgk', text: 'Sebuah prisma segitiga siku-siku memiliki panjang alas $6\\text{ cm}$, tinggi alas $8\\text{ cm}$, dan tinggi prisma $15\\text{ cm}$. Manakah pernyataan tentang bangun ruang ini yang tepat?', options: ['A. Volume prisma adalah $360\\text{ cm}^3$', 'B. Luas alas prisma adalah $48\\text{ cm}^2$', 'C. Sisi miring alas segitiga tersebut adalah $10\\text{ cm}$', 'D. Prisma ini memiliki 5 buah sisi dan 9 buah rusuk'], answer: ['A. Volume prisma adalah $360\\text{ cm}^3$', 'C. Sisi miring alas segitiga tersebut adalah $10\\text{ cm}$', 'D. Prisma ini memiliki 5 buah sisi dan 9 buah rusuk'], weight: 4, pembahasan: 'Luas alas = 1/2 x 6 x 8 = 24. Volume = 24 x 15 = 360. Sisi miring = akar(36+64) = 10. Sifat prisma segitiga: 5 sisi, 9 rusuk.' },
+            { id: 13, type: 'pg', text: 'Ibu Dina meminjam uang di Koperasi Serba Usaha sebesar Rp5.000.000,00 dengan bunga tunggal $12\\%$ per tahun. Jika ia ingin melunasi pinjamannya dalam waktu 10 bulan, berapakah cicilan yang harus ia bayar setiap bulannya?', options: ['A. Rp500.000,00', 'B. Rp550.000,00', 'C. Rp600.000,00', 'D. Rp650.000,00'], answer: ['B. Rp550.000,00'], weight: 4, pembahasan: 'Bunga 10 bln = 10/12 x 12% x 5jt = 500rb. Total pengembalian = 5.500.000. Cicilan = 5.500.000 / 10 = Rp550.000.' },
+            { id: 14, type: 'bs', text: 'Benar atau Salah: "Sebuah akuarium berbentuk kubus berisi air setengah penuh sebanyak $108.000\\text{ cm}^3$. Maka panjang rusuk akuarium tersebut adalah $60\\text{ cm}$."', options: ['Benar', 'Salah'], answer: ['Benar'], weight: 4, pembahasan: 'Volume penuh = 108.000 x 2 = 216.000 cm3. Rusuk = akar pangkat tiga dari 216.000 = 60 cm. Benar.' },
+            { id: 15, type: 'pg', text: 'Suhu udara di puncak gunung pada pukul 04.00 adalah $-4^{\\circ}\\text{C}$. Seiring terbitnya matahari, suhu naik rata-rata $2^{\\circ}\\text{C}$ setiap jam. Berapakah suhu udara di puncak tersebut pada pukul 11.00?', options: ['A. $10^{\\circ}\\text{C}$', 'B. $12^{\\circ}\\text{C}$', 'C. $14^{\\circ}\\text{C}$', 'D. $18^{\\circ}\\text{C}$'], answer: ['A. $10^{\\circ}\\text{C}$'], weight: 4, pembahasan: 'Selisih waktu = 7 jam. Kenaikan suhu = 7 x 2 = 14 derajat. Suhu akhir = -4 + 14 = 10 derajat.' },
+            { id: 16, type: 'pgk', text: 'Siswa kelas 6 SD Merdeka diminta mengidentifikasi jaring-jaring bangun ruang limas segi empat. Manakah kriteria jaring-jaring yang benar untuk membentuk limas tersebut secara tertutup sempurna?', options: ['A. Terdiri dari satu persegi dan empat segitiga', 'B. Terdiri dari lima buah persegi yang saling berhubungan', 'C. Tinggi keempat segitiga harus disesuaikan dengan sisi miring limas', 'D. Keempat segitiga akan bertemu pada satu titik puncak (vertex)'], answer: ['A. Terdiri dari satu persegi dan empat segitiga', 'C. Tinggi keempat segitiga harus disesuaikan dengan sisi miring limas', 'D. Keempat segitiga akan bertemu pada satu titik puncak (vertex)'], weight: 4, pembahasan: 'Limas segi empat alasnya persegi/segi empat, selimutnya 4 segitiga yang bertemu di puncak.' },
+            { id: 17, type: 'pg', text: 'Sebuah lahan berbentuk trapesium sama kaki memiliki panjang sisi sejajar $20\\text{ m}$ dan $10\\text{ m}$. Jika jarak antara kedua sisi sejajar tersebut (tinggi) adalah $12\\text{ m}$, dan harga tanah di daerah itu adalah Rp1.500.000,00 per meter persegi, berapa harga jual seluruh lahan tersebut?', options: ['A. Rp270.000.000,00', 'B. Rp300.000.000,00', 'C. Rp360.000.000,00', 'D. Rp540.000.000,00'], answer: ['A. Rp270.000.000,00'], weight: 4, pembahasan: 'Luas trapesium = 1/2 x (20+10) x 12 = 180 m2. Harga = 180 x 1.500.000 = Rp270.000.000.' },
+            { id: 18, type: 'bs', text: 'Benar atau Salah: "Apabila panjang suatu persegi panjang dilipatgandakan dan lebarnya tetap, maka luas persegi panjang tersebut akan menjadi dua kali lipat luas semula."', options: ['Benar', 'Salah'], answer: ['Benar'], weight: 4, pembahasan: 'Luas awal = p x l. Luas baru = (2p) x l = 2pl. Benar, menjadi dua kali lipat.' },
+            { id: 19, type: 'pg', text: 'Panitia kurban menerima sapi dengan berat masing-masing: $1,2$ ton; $850\\text{ kg}$; dan $12\\text{ kuintal}$. Berapa rata-rata berat satu ekor sapi kurban tersebut dalam satuan kilogram?', options: ['A. 1000 kg', 'B. 1050 kg', 'C. 1083,3 kg', 'D. 1100 kg'], answer: ['C. 1083,3 kg'], weight: 4, pembahasan: 'Total berat = 1200 + 850 + 1200 = 3250 kg. Rata-rata = 3250 / 3 = 1083,3 kg.' },
+            { id: 20, type: 'pgk', text: 'Perhatikan kumpulan pecahan berikut: $\\frac{2}{5} ; 0,45 ; 42\\% ; \\frac{9}{20}$. Pernyataan mengenai urutan pecahan tersebut yang tepat adalah...', options: ['A. Pecahan terbesar adalah $\\frac{9}{20}$', 'B. Urutan dari yang terkecil: $\\frac{2}{5} < 42\\% < 0,45 = \\frac{9}{20}$', 'C. Jika semua diubah ke desimal, $42\\%$ menjadi 0,42', 'D. Pecahan terkecil adalah $42\\%$'], answer: ['A. Pecahan terbesar adalah $\\frac{9}{20}$', 'B. Urutan dari yang terkecil: $\\frac{2}{5} < 42\\% < 0,45 = \\frac{9}{20}$', 'C. Jika semua diubah ke desimal, $42\\%$ menjadi 0,42'], weight: 4, pembahasan: 'Konversi ke desimal: 2/5 = 0,40; 0,45 = 0,45; 42% = 0,42; 9/20 = 0,45. Urutan terkecil: 0,40 (2/5).' },
+            { id: 21, type: 'pg', text: 'Pola susunan lidi membentuk segitiga sama sisi berturut-turut membutuhkan 3, 5, 7, 9 batang lidi. Berapa banyak lidi yang dibutuhkan untuk membuat susunan segitiga pada pola ke-15 dengan rumus pola $2n + 1$?', options: ['A. 29 batang', 'B. 31 batang', 'C. 33 batang', 'D. 35 batang'], answer: ['B. 31 batang'], weight: 4, pembahasan: 'Masukkan n = 15 ke rumus 2n + 1. Hasilnya 2(15) + 1 = 31.' },
+            { id: 22, type: 'bs', text: 'Benar atau Salah: "Sebuah dadu bersisi 6 dilempar satu kali. Peluang empiris/teoretis untuk mendapatkan angka genap prima adalah tepat $\\frac{1}{6}$."', options: ['Benar', 'Salah'], answer: ['Benar'], weight: 4, pembahasan: 'Angka genap prima di dadu hanya angka 2 (1 angka). Jadi peluangnya 1/6. Benar.' },
+            { id: 23, type: 'pg', text: 'Dalam sebuah lomba cerdas cermat TKA, aturan penilaiannya adalah: Benar diberi skor 4, Salah diberi skor -1, dan Tidak Dijawab diberi skor 0. Dari 40 soal yang diberikan, tim Lentera berhasil menjawab 32 soal. Jika skor total yang mereka peroleh adalah 103, berapa banyak soal yang mereka jawab dengan benar?', options: ['A. 25 soal', 'B. 27 soal', 'C. 28 soal', 'D. 30 soal'], answer: ['B. 27 soal'], weight: 4, pembahasan: 'Misal benar = x, salah = 32-x. 4x - 1(32-x) = 103. 5x - 32 = 103. 5x = 135, x = 27.' },
+            { id: 24, type: 'pgk', text: 'Ayah membuat taman rumput berbentuk lingkaran. Di tengahnya terdapat kolam air mancur yang juga berbentuk lingkaran. Jika jari-jari taman $14\\text{ m}$ dan jari-jari kolam $7\\text{ m}$, manakah dari pernyataan berikut yang benar? (Gunakan $\\pi = \\frac{22}{7}$)', options: ['A. Luas seluruh taman termasuk kolam adalah $616\\text{ m}^2$', 'B. Luas kolam air mancur adalah $154\\text{ m}^2$', 'C. Luas area yang ditanami rumput (diluar kolam) adalah $462\\text{ m}^2$', 'D. Keliling kolam air mancur adalah $88\\text{ m}$'], answer: ['A. Luas seluruh taman termasuk kolam adalah $616\\text{ m}^2$', 'B. Luas kolam air mancur adalah $154\\text{ m}^2$', 'C. Luas area yang ditanami rumput (diluar kolam) adalah $462\\text{ m}^2$'], weight: 4, pembahasan: 'Luas besar = 22/7 x 14 x 14 = 616. Luas kecil = 22/7 x 7 x 7 = 154. Luas rumput = 616 - 154 = 462. Keliling kolam = 22/7 x 14 = 44 (D salah).' },
+            { id: 25, type: 'pg', text: 'Ani dan Budi sedang mengecat tembok kelas. Jika Ani bekerja sendiri, tembok selesai dalam 6 hari. Jika Budi bekerja sendiri, tembok selesai dalam 12 hari. Apabila mereka memutuskan untuk mengecat tembok itu bersama-sama sejak awal, dalam berapa hari pekerjaan itu akan selesai seluruhnya?', options: ['A. 3 hari', 'B. 4 hari', 'C. 5 hari', 'D. 9 hari'], answer: ['B. 4 hari'], weight: 4, pembahasan: 'Kecepatan Ani = 1/6 per hari. Budi = 1/12 per hari. Bersama = 1/6 + 1/12 = 3/12 = 1/4 bagian per hari. Jadi selesai 4 hari.' }
+        ];
+
+        // 25 SOAL HOTS BAHASA INDONESIA
+        const biQuestions = [
+            { id: 1, type: 'pg', text: 'Bacalah teks berikut!\n"Hutan mangrove di pesisir utara Jawa memegang peranan krusial bagi ekosistem laut dan darat. Akar-akar mangrove yang saling mengait berfungsi sebagai penahan ombak yang efektif untuk mencegah abrasi pantai. Selain itu, kawasan ini menjadi tempat pemijahan (bertelur) berbagai jenis ikan dan udang sebelum mereka kembali ke laut lepas."\nBerdasarkan teks di atas, kesimpulan paling logis yang dapat ditarik tentang dampak penebangan liar hutan mangrove adalah...', options: ['A. Hasil tangkapan ikan nelayan akan meningkat pesat', 'B. Wilayah daratan akan semakin aman dari pasang surut air laut', 'C. Ancaman abrasi pantai meningkat dan populasi ikan pesisir terancam menurun', 'D. Keanekaragaman burung migran di pesisir utara Jawa akan bertambah'], answer: ['C. Ancaman abrasi pantai meningkat dan populasi ikan pesisir terancam menurun'], weight: 4, pembahasan: 'Teks menyatakan mangrove menahan ombak (cegah abrasi) dan tempat bertelur ikan. Hilangnya mangrove berarti kehilang dua fungsi tersebut.' },
+            { id: 2, type: 'pgk', text: 'Cermati kutipan cerita berikut!\n"Meski keringat bercucuran membasahi seragam usangnya, Kakek Karto pantang menyerah mengayuh becaknya. Baginya, pantang membawa pulang uang hasil mengemis. \'Biar sedikit yang penting keringat sendiri, Nduk,\' ujarnya saat membelikan cucunya sebuah buku tulis dari sisa penghasilannya hari itu."\nNilai-nilai moral yang terkandung dalam sikap Kakek Karto di atas adalah... (Pilih lebih dari satu)', options: ['A. Kejujuran dalam mencari nafkah', 'B. Kerja keras pantang menyerah meski kondisi sulit', 'C. Kemandirian dan menjaga harga diri (tidak meminta-minta)', 'D. Kasih sayang yang tulus terhadap keluarga'], answer: ['B. Kerja keras pantang menyerah meski kondisi sulit', 'C. Kemandirian dan menjaga harga diri (tidak meminta-minta)', 'D. Kasih sayang yang tulus terhadap keluarga'], weight: 4, pembahasan: 'Teks menunjukkan Kakek Karto bekerja keras (keringat bercucuran), tidak mengemis (harga diri), dan menyayangi cucunya (membelikan buku).' },
+            { id: 3, type: 'bs', text: 'Tentukan apakah pernyataan ini Benar atau Salah!\nDalam kalimat: "Para peneliti mulai membedah arsip-arsip kuno untuk mencari tahu sejarah letusan Gunung Tambora.", kata "membedah" memiliki makna kias (konotatif) yang berarti memeriksa atau meneliti secara mendalam dan rinci.', options: ['Benar', 'Salah'], answer: ['Benar'], weight: 4, pembahasan: 'Kata "membedah" aslinya berarti operasi medis (denotatif). Dalam konteks arsip, artinya menelaah secara detail (konotatif). Pernyataan Benar.' },
+            { id: 4, type: 'pg', text: 'Perhatikan petunjuk penggunaan alat penyedot debu (vacuum cleaner) yang disusun secara acak berikut!\n(1) Tekan tombol power untuk menyalakan mesin.\n(2) Colokkan kabel daya ke stopkontak dinding.\n(3) Bersihkan tabung debu jika indikator penuh menyala.\n(4) Arahkan mulut penyedot ke area lantai yang berdebu.\n(5) Matikan mesin dan cabut kabel setelah selesai digunakan.\nUrutan yang paling logis agar alat dapat digunakan dengan benar adalah...', options: ['A. (2) - (1) - (4) - (5) - (3)', 'B. (1) - (2) - (4) - (3) - (5)', 'C. (2) - (4) - (1) - (3) - (5)', 'D. (4) - (2) - (1) - (5) - (3)'], answer: ['A. (2) - (1) - (4) - (5) - (3)'], weight: 4, pembahasan: 'Logika penggunaan elektronik: colok listrik (2), nyalakan (1), gunakan menyedot (4), matikan (5), baru bersihkan alat jika perlu (3).' },
+            { id: 5, type: 'pgk', text: 'Bacalah iklan layanan masyarakat berikut!\n"Bumi semakin panas! Setiap 1 liter bahan bakar yang Anda hemat, berarti Anda mengurangi 2,3 kg emisi karbon di udara. Mari beralih ke transportasi umum mulai besok demi paru-paru dunia yang lebih sehat!"\nBerdasarkan iklan tersebut, manakah kalimat yang merupakan fakta? (Pilih lebih dari satu)', options: ['A. Bumi semakin panas!', 'B. 1 liter bahan bakar yang dihemat mengurangi 2,3 kg emisi karbon.', 'C. Mari beralih ke transportasi umum mulai besok.', 'D. Paru-paru dunia akan lebih sehat jika kita naik bus.'], answer: ['B. 1 liter bahan bakar yang dihemat mengurangi 2,3 kg emisi karbon.'], weight: 4, pembahasan: 'Fakta adalah pernyataan yang memiliki data pasti/terukur. Opsi B mengandung angka spesifik hasil hitungan ilmiah, sedangkan yang lain bersifat opini atau ajakan.' },
+            { id: 6, type: 'bs', text: 'Benar atau Salah: Teks laporan hasil observasi memiliki ciri utama menggunakan bahasa yang subjektif, penuh gaya bahasa kiasan (majas), dan bertujuan untuk menghibur pembacanya.', options: ['Benar', 'Salah'], answer: ['Salah'], weight: 4, pembahasan: 'Teks laporan observasi harus bersifat objektif, faktual, menggunakan bahasa baku (ilmiah/denotatif), dan bertujuan memberikan informasi berdasarkan fakta.' },
+            { id: 7, type: 'pg', text: 'Bacalah paragraf berikut!\n"Banyak orang yang meremehkan pentingnya sarapan. Padahal, sarapan ibarat bahan bakar awal bagi tubuh setelah semalaman berpuasa (tidur). Siswa yang rutin sarapan dengan menu bergizi terbukti memiliki tingkat konsentrasi 30% lebih tinggi di kelas dibandingkan mereka yang melewatkannya."\nIde pokok paragraf tersebut terletak pada...', options: ['A. Awal paragraf (Deduktif)', 'B. Akhir paragraf (Induktif)', 'C. Awal dan Akhir paragraf (Campuran)', 'D. Tersebar di seluruh paragraf'], answer: ['A. Awal paragraf (Deduktif)'], weight: 4, pembahasan: 'Ide pokoknya adalah pentingnya sarapan yang dikemukakan di kalimat awal, lalu kalimat selanjutnya adalah penjelas.' },
+            { id: 8, type: 'pgk', text: 'Berikut ini adalah kalimat-kalimat yang tidak efektif. Manakah perbaikan kalimat yang membuatnya menjadi efektif dan baku sesuai EYD? (Pilih lebih dari satu)', options: ['A. "Para siswa-siswi sedang belajar" menjadi "Siswa-siswi sedang belajar"', 'B. "Dia yang memakai baju warna merah adalah kakakku" menjadi "Dia berbaju merah adalah kakakku"', 'C. "Bagi seluruh peserta lomba harap berkumpul di lapangan" menjadi "Seluruh peserta lomba harap berkumpul di lapangan"', 'D. "Ibu membeli beras, sayur, dan buah-buahan" adalah sudah sangat efektif'], answer: ['A. "Para siswa-siswi sedang belajar" menjadi "Siswa-siswi sedang belajar"', 'C. "Bagi seluruh peserta lomba harap berkumpul di lapangan" menjadi "Seluruh peserta lomba harap berkumpul di lapangan"', 'D. "Ibu membeli beras, sayur, dan buah-buahan" adalah sudah sangat efektif'], weight: 4, pembahasan: '"Para siswa-siswi" boros kata. Penggunaan preposisi "Bagi" di awal subjek membuat kalimat tidak bersubjek. Opsi D sudah paralel dan efektif.' },
+            { id: 9, type: 'pg', text: 'Bacalah pantun berikut!\nKe pasar malam membeli pita,\nPita dirajut menjadi hiasan.\nJika ingin meraih cita-cita,\nJanganlah malas mencari wawasan.\n\nPesan yang ingin disampaikan dari pantun tersebut adalah...', options: ['A. Membeli pita di pasar malam sangat menyenangkan', 'B. Belajarlah dengan rajin (mencari wawasan) agar cita-cita tercapai', 'C. Orang yang malas tidak boleh merajut pita', 'D. Cita-cita hanya bisa diraih dengan hiasan pita'], answer: ['B. Belajarlah dengan rajin (mencari wawasan) agar cita-cita tercapai'], weight: 4, pembahasan: 'Pesan pantun terletak pada baris ke-3 dan ke-4 (isi pantun).' },
+            { id: 10, type: 'bs', text: 'Benar atau Salah: Penggunaan huruf kapital pada kalimat "Paman baru saja pulang dari danau Toba membawa oleh-oleh bika ambon." sudah benar sesuai dengan kaidah EYD.', options: ['Benar', 'Salah'], answer: ['Salah'], weight: 4, pembahasan: 'Kata "danau" harus kapital karena diikuti nama diri geografi ("Danau Toba"). "bika ambon" tidak perlu kapital karena nama jenis makanan.' },
+            { id: 11, type: 'pg', text: 'Kalimat majemuk setara yang menyatakan hubungan pertentangan ditandai dengan konjungsi...', options: ['A. dan, serta, lagipula', 'B. karena, sehingga, sebab', 'C. tetapi, melainkan, sedangkan', 'D. ketika, sesudah, sebelum'], answer: ['C. tetapi, melainkan, sedangkan'], weight: 4, pembahasan: 'Hubungan pertentangan selalu menggunakan konjungsi perlawanan seperti tetapi, sedangkan, namun, melainkan.' },
+            { id: 12, type: 'pgk', text: 'Dalam menulis teks eksplanasi mengenai proses terjadinya pelangi, unsur-unsur struktur teks yang harus ada di dalamnya adalah... (Pilih lebih dari satu)', options: ['A. Tesis atau pendapat pribadi penulis', 'B. Pernyataan umum (pembuka)', 'C. Deretan penjelas (urutan sebab-akibat)', 'D. Interpretasi atau kesimpulan penulis'], answer: ['B. Pernyataan umum (pembuka)', 'C. Deretan penjelas (urutan sebab-akibat)', 'D. Interpretasi atau kesimpulan penulis'], weight: 4, pembahasan: 'Teks eksplanasi strukturnya: Pernyataan umum, deretan penjelas, dan interpretasi. Tesis adalah struktur teks eksposisi.' },
+            { id: 13, type: 'pg', text: 'Budi memiliki sifat yang ringan tangan. Namun sayangnya, karena hal itu banyak teman yang kadang salah paham. Kata "ringan tangan" dalam konteks positif pada pergaulan sehari-hari bermakna...', options: ['A. Suka memukul', 'B. Suka menolong', 'C. Suka mencuri', 'D. Suka mengabaikan'], answer: ['B. Suka menolong'], weight: 4, pembahasan: 'Ungkapan ringan tangan memiliki dua makna kias: suka memukul atau suka menolong. Dalam konteks yang bernilai positif, maknanya adalah suka menolong.' },
+            { id: 14, type: 'bs', text: 'Benar atau Salah: Teks persuasif selalu menggunakan argumen untuk meyakinkan pembaca, namun tidak harus memuat kalimat ajakan atau imbauan yang eksplisit.', options: ['Benar', 'Salah'], answer: ['Salah'], weight: 4, pembahasan: 'Tujuan utama teks persuasif adalah mengajak atau membujuk (persuasi). Kalimat ajakan/imbauan (ayo, mari, dll) wajib ada.' },
+            { id: 15, type: 'pg', text: 'Penulisan kata serapan dari bahasa asing yang tepat terdapat pada kalimat...', options: ['A. Sistem administrasi di kantor ini sudah terkomputerisasi.', 'B. Apotik hidup di halaman sekolah kami tumbuh subur.', 'C. Ia memiliki jadwal praktek setiap hari Senin.', 'D. Kwalitas barang impor ini sangat terjamin.'], answer: ['A. Sistem administrasi di kantor ini sudah terkomputerisasi.'], weight: 4, pembahasan: 'Baku: sistem, apotek (bukan apotik), praktik (bukan praktek), kualitas (bukan kwalitas).' },
+            { id: 16, type: 'pgk', text: 'Perbedaan mendasar antara dongeng (fiksi kuno) dengan cerpen (fiksi modern) adalah... (Pilih lebih dari satu)', options: ['A. Dongeng sering kali mengandung unsur magis atau tidak masuk akal, sedangkan cerpen lebih realistis.', 'B. Dongeng diketahui secara pasti siapa penulis aslinya, sedangkan cerpen bersifat anonim.', 'C. Cerpen memiliki alur yang lebih kompleks namun berpusat pada satu peristiwa utama.', 'D. Dongeng diwariskan secara lisan dari generasi ke generasi.'], answer: ['A. Dongeng sering kali mengandung unsur magis atau tidak masuk akal, sedangkan cerpen lebih realistis.', 'C. Cerpen memiliki alur yang lebih kompleks namun berpusat pada satu peristiwa utama.', 'D. Dongeng diwariskan secara lisan dari generasi ke generasi.'], weight: 4, pembahasan: 'Dongeng justru anonim (tidak tahu pengarangnya), kebalikan dari opsi B. Opsi A, C, dan D benar.' },
+            { id: 17, type: 'pg', text: 'Kalimat yang memuat majas personifikasi yang paling tepat adalah...', options: ['A. Wajahnya bersinar bagaikan rembulan purnama.', 'B. Suaranya menggelegar membelah angkasa.', 'C. Angin malam berbisik pelan di telingaku, membawa rindu yang tak tersampaikan.', 'D. Ia adalah bintang kelas yang selalu dibanggakan guru.'], answer: ['C. Angin malam berbisik pelan di telingaku, membawa rindu yang tak tersampaikan.'], weight: 4, pembahasan: 'Personifikasi mengumpamakan benda mati (angin) melakukan tindakan manusia (berbisik).' },
+            { id: 18, type: 'bs', text: 'Benar atau Salah: Dalam teknik membaca cepat (skimming), tujuan utamanya adalah mencari gagasan pokok atau inti sari seluruh bacaan tanpa harus membaca kata per kata secara mendetail.', options: ['Benar', 'Salah'], answer: ['Benar'], weight: 4, pembahasan: 'Skimming memang teknik membaca melompat untuk menangkap ide pokok dengan cepat.' },
+            { id: 19, type: 'pg', text: 'Lengkapi kalimat rumpang berikut dengan konjungsi yang tepat!\n"Rini tidak berangkat ke sekolah hari ini ... ia harus menjaga ibunya yang sedang dirawat di rumah sakit."\nKonjungsi yang paling tepat adalah...', options: ['A. walaupun', 'B. sehingga', 'C. karena', 'D. padahal'], answer: ['C. karena'], weight: 4, pembahasan: 'Menunjukkan hubungan sebab-akibat (alasan).' },
+            { id: 20, type: 'pgk', text: 'Manakah dari pernyataan berikut yang merupakan ciri-ciri teks deskripsi yang baik? (Pilih lebih dari satu)', options: ['A. Melibatkan panca indera pembaca seolah melihat, mendengar, atau merasakan.', 'B. Menjelaskan tahapan-tahapan pembuatan sesuatu secara kronologis.', 'C. Menggunakan kata-kata sifat untuk menggambarkan kondisi objek.', 'D. Menjabarkan objek atau ruang dengan detail dan spesifik.'], answer: ['A. Melibatkan panca indera pembaca seolah melihat, mendengar, atau merasakan.', 'C. Menggunakan kata-kata sifat untuk menggambarkan kondisi objek.', 'D. Menjabarkan objek atau ruang dengan detail dan spesifik.'], weight: 4, pembahasan: 'Opsi B adalah ciri teks prosedur, bukan deskripsi.' },
+            { id: 21, type: 'pg', text: 'Antonim dari kata "Nahas" pada kalimat "Nasib nahas menimpa pengendara motor itu." adalah...', options: ['A. Celaka', 'B. Sial', 'C. Mujur', 'D. Buruk'], answer: ['C. Mujur'], weight: 4, pembahasan: 'Nahas bersinonim dengan sial/celaka. Antonimnya adalah beruntung atau mujur.' },
+            { id: 22, type: 'bs', text: 'Benar atau Salah: Kalimat "Di mana kamu meletakkan buku itu?" merupakan bentuk kalimat interogatif yang memerlukan jawaban berupa lokasi atau tempat.', options: ['Benar', 'Salah'], answer: ['Benar'], weight: 4, pembahasan: 'Kata tanya "di mana" berfungsi untuk menanyakan lokasi. Benar.' },
+            { id: 23, type: 'pg', text: 'Jika kamu diminta untuk menulis tanggapan atas buku cerita yang kamu baca, bagian yang berisi ringkasan singkat isi cerita tanpa membocorkan akhir cerita (spoiler) disebut...', options: ['A. Orientasi', 'B. Sinopsis', 'C. Evaluasi', 'D. Rekomendasi'], answer: ['B. Sinopsis'], weight: 4, pembahasan: 'Sinopsis adalah ringkasan singkat sebuah cerita.' },
+            { id: 24, type: 'pgk', text: 'Pemakaian tanda baca koma (,) yang tepat terdapat pada kalimat... (Pilih lebih dari satu)', options: ['A. Wah, pemandangan di Gunung Bromo sangat indah!', 'B. Saya ingin membeli buku, namun uang saya belum cukup.', 'C. Rina membawa pensil, penghapus dan, penggaris.', 'D. Oleh karena itu, kita harus menjaga kebersihan lingkungan.'], answer: ['A. Wah, pemandangan di Gunung Bromo sangat indah!', 'B. Saya ingin membeli buku, namun uang saya belum cukup.', 'D. Oleh karena itu, kita harus menjaga kebersihan lingkungan.'], weight: 4, pembahasan: 'Penggunaan di opsi C salah, koma harus sebelum "dan", bukan sesudahnya.' },
+            { id: 25, type: 'pg', text: '"Puncak arus mudik Lebaran diperkirakan terjadi pada H-3. Kepolisian telah menyiagakan personel di berbagai titik rawan kemacetan." Tanggapan yang paling sesuai, logis, dan solutif terhadap isu berita tersebut adalah...', options: ['A. Sebaiknya mudik dilarang saja agar tidak macet.', 'B. Pemudik diimbau untuk berangkat lebih awal guna menghindari penumpukan kendaraan.', 'C. Polisi tidak perlu berjaga karena kemacetan adalah hal yang biasa setiap tahun.', 'D. Arus mudik pasti lancar jika jalan tol digratiskan selamanya.'], answer: ['B. Pemudik diimbau untuk berangkat lebih awal guna menghindari penumpukan kendaraan.'], weight: 4, pembahasan: 'Tanggapan B paling rasional, solutif, dan relevan dengan konteks teks berita tanpa memberikan pendapat yang ekstrem/tidak masuk akal.' }
+        ];
+
+        // Menyematkan Database Soal ke Semua Paket
+        const QUESTION_BANK = {
+            'MN001': JSON.parse(JSON.stringify(mathQuestions)),
+            'MN002': JSON.parse(JSON.stringify(mathQuestions)),
+            'MN003': JSON.parse(JSON.stringify(mathQuestions)),
+            'MN004': JSON.parse(JSON.stringify(mathQuestions)),
+            'MN005': JSON.parse(JSON.stringify(mathQuestions)),
+            'BIL001': JSON.parse(JSON.stringify(biQuestions)),
+            'BIL002': JSON.parse(JSON.stringify(biQuestions)),
+            'BIL003': JSON.parse(JSON.stringify(biQuestions)),
+            'BIL004': JSON.parse(JSON.stringify(biQuestions)),
+            'BIL005': JSON.parse(JSON.stringify(biQuestions))
+        };
+
+        // State & Variabel Global
+        let studentInfo = { username: '', name: '' };
+        let currentExamState = {
+            examId: null, examTitle: null, examType: null, questions: [], answers: {}, currentIndex: 0, timeLeft: 50 * 60, timerInterval: null
+        };
+
+        // Navigasi Tampilan
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        // Fitur Login
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if(u === 'lenteragamma' && p === 'lenteragamma1') {
+                studentInfo.username = u;
+                showSection('identity-section');
+            } else {
+                Swal.fire('Error', 'Username atau Password salah!', 'error');
+            }
+        });
+
+        // Fitur Identitas
+        document.getElementById('identity-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            studentInfo.name = document.getElementById('student-name').value.trim().toUpperCase();
+            document.getElementById('display-student-name').innerText = studentInfo.name;
+            generatePacketList();
+            showSection('main-menu-section');
+        });
+
+        // Fitur Logout
+        function logout() {
+            studentInfo = { username: '', name: '' };
+            localStorage.removeItem('tka_saved_exam');
+            document.getElementById('login-form').reset();
+            document.getElementById('identity-form').reset();
+            showSection('login-section');
+        }
+
+        // Pembuatan Tombol Paket
+        function generatePacketList() {
+            const mathCont = document.getElementById('math-packet-list');
+            const biCont = document.getElementById('bi-packet-list');
+            mathCont.innerHTML = ''; biCont.innerHTML = '';
+
+            PACKET_DATA.forEach(pkt => {
+                let btn = document.createElement('button');
+                btn.className = 'w-full text-left bg-gray-50 border p-4 rounded-lg font-semibold hover:bg-gray-100 flex justify-between items-center transition';
+                btn.innerHTML = `<span>${pkt.name}</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded">Mulai</span>`;
+                btn.onclick = () => confirmExam(pkt);
+                if(pkt.type === 'MATH') mathCont.appendChild(btn);
+                else biCont.appendChild(btn);
+            });
+        }
+
+        // Konfirmasi & Resume Ujian
+        async function confirmExam(packet) {
+            const savedState = JSON.parse(localStorage.getItem('tka_saved_exam'));
+            if(savedState && savedState.examId === packet.id) {
+                Swal.fire({
+                    title: 'Lanjutkan Ujian?',
+                    text: "Anda memiliki sesi ujian yang belum selesai.",
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Lanjutkan',
+                    cancelButtonText: 'Mulai Baru'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        currentExamState = savedState;
+                        startExamUI();
+                    } else {
+                        localStorage.removeItem('tka_saved_exam');
+                        promptPassword(packet);
+                    }
+                });
+                return;
+            }
+            promptPassword(packet);
+        }
+
+        // Password Paket
+        async function promptPassword(packet) {
+            const { value: pass } = await Swal.fire({
+                title: 'Masukkan Password Paket',
+                input: 'password',
+                inputPlaceholder: 'Password Ujian',
+                showCancelButton: true
+            });
+            if (pass) {
+                if (pass === packet.pass) {
+                    initExam(packet);
+                } else {
+                    Swal.fire('Salah!', 'Password paket tidak valid.', 'error');
+                }
+            }
+        }
+
+        // Inisialisasi Ujian
+        function initExam(packet, isRetake = false) {
+            let qs = QUESTION_BANK[packet.id] || [];
+            if(qs.length === 0) {
+                Swal.fire('Maaf', 'Soal untuk paket ini belum tersedia.', 'warning');
+                return;
+            }
+            // Acak urutan soal
+            qs = qs.sort(() => Math.random() - 0.5);
+            // Acak opsi jawaban (PG)
+            qs.forEach(q => {
+                if(q.type === 'pg' || q.type === 'pgk') {
+                    q.options = q.options.sort(() => Math.random() - 0.5);
+                }
+            });
+
+            currentExamState = {
+                examId: packet.id, examTitle: packet.name, examType: packet.type,
+                questions: qs, answers: {}, currentIndex: 0, timeLeft: 50 * 60, timerInterval: null
+            };
+            startExamUI();
+        }
+
+        // Tampilan Ujian & Timer
+        function startExamUI() {
+            showSection('exam-section');
+            document.getElementById('exam-title').innerText = currentExamState.examTitle;
+            document.getElementById('exam-student-name').innerText = studentInfo.name;
+            
+            buildNavGrid();
+            renderQuestion();
+            
+            clearInterval(currentExamState.timerInterval);
+            currentExamState.timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            currentExamState.timeLeft--;
+            saveState();
+            
+            let m = Math.floor(currentExamState.timeLeft / 60);
+            let s = currentExamState.timeLeft % 60;
+            document.getElementById('timer-display').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            
+            if(currentExamState.timeLeft <= 0) {
+                clearInterval(currentExamState.timerInterval);
+                Swal.fire('Waktu Habis!', 'Ujian otomatis dikumpulkan.', 'info').then(() => finishExam());
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('tka_saved_exam', JSON.stringify(currentExamState));
+        }
+
+        // Render Soal per Halaman (FIXED UNTUK TANDA BACA/KOMA)
+        function renderQuestion() {
+            const q = currentExamState.questions[currentExamState.currentIndex];
+            document.getElementById('q-number').innerText = currentExamState.currentIndex + 1;
+            
+            let typeText = q.type === 'pg' ? 'Pilihan Ganda' : (q.type === 'pgk' ? 'Pilihan Ganda Kompleks' : 'Benar-Salah');
+            document.getElementById('q-type').innerText = typeText;
+            document.getElementById('question-text').innerHTML = q.text.replace(/\n/g, '<br>');
+            
+            const optArea = document.getElementById('options-area');
+            optArea.innerHTML = '';
+            
+            let currentAns = currentExamState.answers[q.id] || [];
+
+            q.options.forEach((opt, idx) => {
+                let idStr = `opt_${idx}`;
+                let inputType = q.type === 'pgk' ? 'checkbox' : 'radio';
+                let isChecked = currentAns.includes(opt) ? 'checked' : '';
+                
+                // Melindungi tanda petik dua agar tidak merusak wrapper string HTML
+                let safeValue = opt.replace(/"/g, '&quot;');
+                
+                let html = `
+                    <div class="relative">
+                        <input type="${inputType}" name="q_answer" id="${idStr}" value="${safeValue}" class="option-input" ${isChecked} onchange="recordAnswer('${q.id}', '${q.type}', this.value, this.checked)">
+                        <label for="${idStr}" class="option-label">
+                            <span class="custom-box"></span>
+                            <span class="flex-1">${opt}</span>
+                        </label>
+                    </div>
+                `;
+                optArea.insertAdjacentHTML('beforeend', html);
+            });
+
+            updateNavUI();
+            MathJax.typesetPromise().catch((err) => console.log(err));
+        }
+
+        // Mencatat Jawaban
+        function recordAnswer(qId, qType, optValue, isChecked) {
+            if(!currentExamState.answers[qId]) currentExamState.answers[qId] = [];
+            
+            if(qType === 'pg' || qType === 'bs') {
+                currentExamState.answers[qId] = [optValue];
+            } else if(qType === 'pgk') {
+                if(isChecked) {
+                    currentExamState.answers[qId].push(optValue);
+                } else {
+                    currentExamState.answers[qId] = currentExamState.answers[qId].filter(v => v !== optValue);
+                }
+            }
+            saveState();
+            updateNavUI();
+        }
+
+        // Navigasi Next/Prev/Jump
+        function nextQuestion() {
+            if(currentExamState.currentIndex < currentExamState.questions.length - 1) {
+                currentExamState.currentIndex++;
+                renderQuestion();
+            }
+        }
+        function prevQuestion() {
+            if(currentExamState.currentIndex > 0) {
+                currentExamState.currentIndex--;
+                renderQuestion();
+            }
+        }
+        function jumpQuestion(index) {
+            currentExamState.currentIndex = index;
+            renderQuestion();
+        }
+
+        function buildNavGrid() {
+            const grid = document.getElementById('question-nav-grid');
+            grid.innerHTML = '';
+            currentExamState.questions.forEach((q, idx) => {
+                let box = document.createElement('div');
+                box.className = 'nav-box';
+                box.id = `nav-box-${idx}`;
+                box.innerText = idx + 1;
+                box.onclick = () => jumpQuestion(idx);
+                grid.appendChild(box);
+            });
+        }
+
+        function updateNavUI() {
+            currentExamState.questions.forEach((q, idx) => {
+                let box = document.getElementById(`nav-box-${idx}`);
+                if(!box) return;
+                let ans = currentExamState.answers[q.id];
+                if(ans && ans.length > 0) box.classList.add('answered');
+                else box.classList.remove('answered');
+                if(idx === currentExamState.currentIndex) box.classList.add('active');
+                else box.classList.remove('active');
+            });
+        }
+
+        // Submit Ujian
+        function submitExam() {
+            Swal.fire({
+                title: 'Yakin Selesai?',
+                text: "Pastikan semua soal telah terjawab.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Selesai!'
+            }).then((result) => {
+                if (result.isConfirmed) finishExam();
+            });
+        }
+
+        let finalResultData = {};
+
+        function finishExam() {
+            clearInterval(currentExamState.timerInterval);
+            localStorage.removeItem('tka_saved_exam');
+            
+            let totalScore = 0;
+            let maxScore = currentExamState.questions.reduce((sum, q) => sum + q.weight, 0);
+            
+            currentExamState.questions.forEach(q => {
+                let userAns = currentExamState.answers[q.id] || [];
+                let isCorrect = false;
+                
+                if(q.type === 'pg' || q.type === 'bs') {
+                    if(userAns.length > 0 && userAns[0] === q.answer[0]) isCorrect = true;
+                } else if (q.type === 'pgk') {
+                    if(userAns.length === q.answer.length && userAns.every(v => q.answer.includes(v))) {
+                        isCorrect = true;
+                    }
+                }
+                
+                if(isCorrect) totalScore += q.weight;
+                q.isCorrect = isCorrect;
+                q.userAnswer = userAns;
+            });
+
+            let finalScore = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+            let predicate = 'D (Kurang)';
+            if(finalScore >= 92) predicate = 'A (Sangat Baik)';
+            else if(finalScore >= 84) predicate = 'B (Baik)';
+            else if(finalScore >= 76) predicate = 'C (Cukup)';
+
+            let isPassed = finalScore > 75;
+
+            finalResultData = {
+                name: studentInfo.name, examTitle: currentExamState.examTitle, examId: currentExamState.examId,
+                score: finalScore, predicate: predicate, isPassed: isPassed, examType: currentExamState.examType,
+                questions: currentExamState.questions
+            };
+
+            renderResultUI();
+        }
+
+        function renderResultUI() {
+            showSection('result-section');
+            document.getElementById('res-exam-title').innerText = finalResultData.examTitle;
+            document.getElementById('res-score').innerText = finalResultData.score;
+            document.getElementById('res-grade').innerText = finalResultData.predicate;
+            
+            let statusEl = document.getElementById('res-status');
+            statusEl.innerText = finalResultData.isPassed ? "LULUS" : "TIDAK LULUS";
+            statusEl.className = finalResultData.isPassed ? "text-2xl font-bold mt-2 text-green-600" : "text-2xl font-bold mt-2 text-red-600";
+            
+            const btnCert = document.getElementById('btn-cert');
+            if(finalResultData.isPassed) {
+                btnCert.disabled = false;
+                btnCert.title = "";
+            } else {
+                btnCert.disabled = true;
+                btnCert.title = "Nilai harus di atas 75 untuk unduh sertifikat";
+            }
+
+            renderPembahasan();
+        }
+
+        // TAMPILAN PEMBAHASAN (FIXED: PEMISAH ' | ' SUPAYA KALIMAT KOMA TIDAK PECAH)
+        function renderPembahasan() {
+            const area = document.getElementById('discussion-area');
+            area.innerHTML = '';
+            
+            finalResultData.questions.forEach((q, idx) => {
+                let bg = q.isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+                
+                let uAns = q.userAnswer.length > 0 ? q.userAnswer.join(' | ') : 'Tidak Dijawab';
+                let cAns = q.answer.join(' | ');
+                
+                let html = `
+                    <div class="p-4 border rounded-lg ${bg}">
+                        <p class="font-bold mb-2">Soal ${idx + 1}</p>
+                        <p class="text-gray-700 mb-2">${q.text.replace(/\n/g, '<br>')}</p>
+                        <p class="text-sm"><strong>Jawaban Anda:</strong> ${uAns} ${q.isCorrect ? '✅' : '❌'}</p>
+                        <p class="text-sm"><strong>Kunci Jawaban:</strong> ${cAns}</p>
+                        <div class="mt-2 text-sm bg-white p-3 rounded border">
+                            <strong>Pembahasan:</strong> ${q.pembahasan}
+                        </div>
+                    </div>
+                `;
+                area.insertAdjacentHTML('beforeend', html);
+            });
+            MathJax.typesetPromise().catch((err) => console.log(err));
+        }
+
+        function retakeExam() {
+            let packet = PACKET_DATA.find(p => p.id === finalResultData.examId);
+            initExam(packet, true);
+        }
+
+        // ================= PDF CERTIFICATE GENERATOR LOGIC (HIGH QUALITY DESIGN) ================= //
+        function downloadCertificate() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            
+            // 1. Triple Border Premium Layout (Gold - Dark Blue - Thin Gold)
+            doc.setDrawColor(218, 165, 32); doc.setLineWidth(4);
+            doc.rect(10, 10, pageWidth - 20, pageHeight - 20);
+            
+            doc.setDrawColor(30, 58, 138); doc.setLineWidth(1);
+            doc.rect(14, 14, pageWidth - 28, pageHeight - 28);
+            
+            doc.setDrawColor(218, 165, 32); doc.setLineWidth(0.5);
+            doc.rect(16, 16, pageWidth - 32, pageHeight - 32);
+
+            // 2. Render Logo Utama Instansi di Halaman Terdepan PDF
+            const logoImg = document.getElementById('logo-img');
+            try {
+                if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+                    doc.addImage(logoImg, 'JPEG', pageWidth / 2 - 15, 25, 30, 30);
+                }
+            } catch(e) { console.warn("Logo utama gagal dimuat di PDF:", e); }
+
+            // 3. Header Text
+            doc.setFont("helvetica", "bold"); doc.setFontSize(26); doc.setTextColor(30, 58, 138);
+            doc.text("LENTERA GAMMA", pageWidth/2, 65, { align: "center" });
+            
+            doc.setFontSize(12); doc.setTextColor(100);
+            doc.text("BIMBINGAN BELAJAR", pageWidth/2, 72, { align: "center" });
+
+            // 4. Judul Sertifikat
+            doc.setFont("helvetica", "bold"); doc.setFontSize(30); doc.setTextColor(218, 165, 32);
+            doc.text("CERTIFICATE", pageWidth/2, 95, { align: "center" });
+            doc.setFontSize(16); doc.setTextColor(50);
+            doc.text("OF ACHIEVEMENT", pageWidth/2, 103, { align: "center" });
+
+            // 5. Nomor Sertifikat Dinamis
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const certNumber = `CERT/LG/${year}/${month}/${finalResultData.examId}`;
+            doc.setFontSize(10); doc.setTextColor(100);
+            doc.text(`Nomor: ${certNumber}`, pageWidth/2, 115, { align: "center" });
+
+            // 6. Nama Penerima dengan Auto-Scale Pengecil Font Anti-Tabrak Garis Tepi
+            doc.setFont("helvetica", "italic"); doc.setFontSize(14); doc.setTextColor(80);
+            doc.text("Diberikan Kepada:", pageWidth/2, 135, { align: "center" });
+
+            let nameFont = 28;
+            doc.setFont("helvetica", "bold"); doc.setTextColor(30, 58, 138);
+            doc.setFontSize(nameFont);
+            
+            while(doc.getTextWidth(finalResultData.name) > pageWidth - 60 && nameFont > 12) {
+                nameFont--;
+                doc.setFontSize(nameFont);
+            }
+            doc.text(finalResultData.name, pageWidth/2, 150, { align: "center" });
+
+            // Garis pembatas nama
+            doc.setDrawColor(200); doc.setLineWidth(1);
+            doc.line(pageWidth/2 - 60, 155, pageWidth/2 + 60, 155);
+
+            // 7. Deskripsi Kelulusan
+            doc.setFont("helvetica", "normal"); doc.setFontSize(12); doc.setTextColor(80);
+            doc.text("Atas pencapaian dan kelulusannya dalam menyelesaikan ujian:", pageWidth/2, 165, { align: "center" });
+
+            let titleText = finalResultData.examType === 'MATH' ? "UJIAN TKA MATEMATIKA (NUMERASI)" : "UJIAN TKA BAHASA INDONESIA (LITERASI)";
+            doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(0, 0, 0);
+            doc.text(titleText, pageWidth/2, 175, { align: "center" });
+
+            doc.setFont("helvetica", "normal"); doc.setFontSize(14); doc.setTextColor(50);
+            doc.text(`Dengan Predikat: ${finalResultData.predicate} (Nilai: ${finalResultData.score})`, pageWidth/2, 185, { align: "center" });
+
+            // 8. Waktu dan Lokasi
+            const dateStr = `${now.getDate()} / ${month} / ${year}`;
+            doc.setFontSize(12); doc.setTextColor(50);
+            doc.text(`Semarang, ${dateStr}`, pageWidth - 50, 220, { align: "center" });
+
+            // 9. MENGGANTI TANDA TANGAN TEKS "Bunaya H.W." MENJADI CAP LOGO
+            try {
+                if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+                    // Penyesuaian kordinat (X, Y) cap agar persis berada di atas nama terang
+                    doc.addImage(logoImg, 'JPEG', pageWidth - 65, 225, 30, 30);
+                }
+            } catch(e) { console.warn("Cap stamp logo gagal dicetak di PDF:", e); }
+            
+            // 10. Tanda Tangan Nama Terang Founder (Digeser sedikit ke bawah agar pas dengan logo di atasnya)
+            doc.setFont("helvetica", "bold"); doc.setTextColor(50); doc.setFontSize(12);
+            doc.text("Bunaya Hanif Wintribrata, M.Pd.", pageWidth - 50, 260, { align: "center" });
+            doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(100);
+            doc.text("Founder, LENTERA GAMMA", pageWidth - 50, 265, { align: "center" });
+
+            // Ekspor Dokumen
+            doc.save(`Sertifikat_${finalResultData.name}_${finalResultData.examId}.pdf`);
+        }
+
+        // Laporan Analisis
+        function downloadAnalysisPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+            doc.text("ANALISIS HASIL UJIAN TKA - LENTERA GAMMA", 14, 20);
+            
+            doc.setFontSize(11); doc.setFont("helvetica", "normal");
+            doc.text(`Nama Lengkap: ${finalResultData.name}`, 14, 30);
+            doc.text(`Paket Ujian: ${finalResultData.examTitle}`, 14, 36);
+            doc.text(`Nilai Akhir: ${finalResultData.score} / 100`, 14, 42);
+            doc.text(`Predikat: ${finalResultData.predicate}`, 14, 48);
+            doc.text(`Ketuntasan: ${finalResultData.isPassed ? "TUNTAS" : "BELUM TUNTAS"}`, 14, 54);
+
+            let totalBenar = finalResultData.questions.filter(q => q.isCorrect).length;
+            let totalSalah = finalResultData.questions.length - totalBenar;
+            doc.text(`Statistik: ${totalBenar} Benar, ${totalSalah} Salah dari ${finalResultData.questions.length} Soal.`, 14, 60);
+
+            const tableData = finalResultData.questions.map((q, i) => {
+                let type = q.type === 'pg' ? 'PG' : (q.type === 'pgk' ? 'Kompleks' : 'B-S');
+                let stat = q.isCorrect ? 'Benar' : 'Salah';
+                return [i + 1, type, stat, q.weight];
+            });
+
+            doc.autoTable({
+                startY: 70, head: [['No', 'Tipe Soal', 'Status Jawaban', 'Bobot Nilai']],
+                body: tableData, theme: 'grid', headStyles: { fillColor: [30, 58, 138] }
+            });
+
+            doc.text("Laporan ini di-generate secara otomatis oleh Sistem TKA Lentera Gamma.", 14, doc.lastAutoTable.finalY + 20);
+            doc.save(`Analisis_${finalResultData.name}_${finalResultData.examId}.pdf`);
+        }
+    </script>
+</body>
+</html>
